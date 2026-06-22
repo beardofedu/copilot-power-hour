@@ -2,13 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>GitHub Copilot Power Hour</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css" />
   <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #0d1117;
+    }
+
     :root {
       --gh-green: #2ea043;
       --gh-blue: #58a6ff;
@@ -929,10 +939,13 @@ How do I run it locally? Where would I add a new API endpoint?"</code></pre>
     transition: 'slide',
     transitionSpeed: 'fast',
     backgroundTransition: 'fade',
-    center: false,
-    width: 1200,
-    height: 700,
-    margin: 0.06,
+    center: true,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 2.0,
+    disableLayout: false,
     plugins: [RevealHighlight, RevealNotes],
     highlight: {
       highlightOnLoad: true,
