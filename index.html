@@ -63,7 +63,7 @@
       width: 100%;
       margin: 0.4em 0;
     }
-    .reveal pre code { background: transparent; border: none; padding: 0.8em 1em; color: var(--gh-text); max-height: none; }
+    .reveal pre code { background: transparent; border: none; padding: 0.7em 0.9em; color: var(--gh-text); max-height: none; line-height: 1.35; }
     .reveal code {
       background: var(--gh-surface);
       border: 1px solid var(--gh-border);
@@ -76,6 +76,7 @@
     /* Layout helpers */
     .two-col   { display: grid; grid-template-columns: 1fr 1fr;     gap: 0.8em; align-items: start; }
     .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.7em; align-items: start; }
+    .two-col > *, .three-col > * { min-width: 0; }
 
     .card {
       background: var(--gh-surface);
@@ -121,6 +122,13 @@
     .demo-cue::before { content:"👉 DEMO  "; font-weight:700; }
 
     .kbgrid { display:grid; grid-template-columns:auto 1fr; gap:0.2em 0.8em; font-size:0.68em; }
+    .tight-table { font-size: 0.63em; }
+    .tight-table th { padding: 0.28em 0.55em; }
+    .tight-table td { padding: 0.22em 0.55em; }
+    .tight-kb .kbgrid { gap: 0.14em 0.55em; font-size: 0.63em; }
+    .tight-kb h3 { margin-bottom: 0.2em; }
+    .tight-cards .card { padding: 0.55em 0.7em; }
+    .tight-cards .card p, .tight-cards .card li { font-size: 0.69em; line-height: 1.45; }
     .kb  { font-family:monospace; background:var(--gh-surface); border:1px solid var(--gh-border); border-radius:3px; padding:0.1em 0.45em; color:var(--gh-orange); white-space:nowrap; }
     .kbd { color:var(--gh-muted); }
 
@@ -153,17 +161,14 @@
 <!-- AGENDA -->
 <section data-background-color="#0d1117">
   <h2>Agenda</h2>
-  <table>
-    <thead><tr><th>Topic</th><th>Time</th></tr></thead>
-    <tbody>
-      <tr><td>🔗 Multi-agent orchestration</td><td><span class="tag tag-blue">0:03 — 15 min</span></td></tr>
-      <tr><td>⚡ CLI vs IDE</td><td><span class="tag">0:18 — 12 min</span></td></tr>
-      <tr><td>🐙 GitHub repos crash course + MCP</td><td><span class="tag">0:30 — 12 min</span></td></tr>
-      <tr><td>⚙️ VS Code user-level settings</td><td><span class="tag">0:42 — 8 min</span></td></tr>
-      <tr><td>🚀 Tips, tricks &amp; hidden gems</td><td><span class="tag">0:50 — 7 min</span></td></tr>
-      <tr><td>💬 Q&amp;A</td><td><span class="tag">0:57 — 3 min</span></td></tr>
-    </tbody>
-  </table>
+  <ul style="list-style:none; margin:0; padding:0; font-size:0.85em; line-height:2;">
+    <li>🔗 Multi-agent orchestration</li>
+    <li>⚡ CLI vs IDE</li>
+    <li>🐙 GitHub repos crash course + MCP</li>
+    <li>⚙️ VS Code user-level settings</li>
+    <li>🚀 Tips, tricks &amp; hidden gems</li>
+    <li>💬 Q&amp;A</li>
+  </ul>
   <div class="callout" style="margin-top:0.8em;">
     <strong>Key idea:</strong> Copilot isn't just autocomplete — it's a <em>platform</em>. Today we close the gap between "I have Copilot" and "I use Copilot well."
   </div>
@@ -176,7 +181,6 @@
   <div style="font-size:2.5em;">🔗</div>
   <h1 class="blue" style="font-size:2.2em; margin:0.2em 0 0.1em;">Multi-Agent Orchestration</h1>
   <p style="color:var(--gh-muted);">Chaining multiple agents &amp; tools in a single workflow</p>
-  <span class="tag tag-blue" style="margin-top:0.5em;">15 min</span>
 </section>
 
 <!-- What is it -->
@@ -236,18 +240,13 @@ the new JWT interface, then run the tests and fix any failures.</code></pre>
   <h2>Pattern 2 — Copilot CLI: <code>/fleet</code> &amp; <code>/plan</code></h2>
   <div class="callout orange" style="margin-bottom:0.5em;">⚠️ The old <code>gh copilot</code> extension is <strong>retired</strong>. Use the new standalone <strong>Copilot CLI</strong>.</div>
   <div class="two-col">
-    <pre><code class="language-bash"># Start interactive session
-copilot
+    <pre><code class="language-bash">copilot
 
-# Parallel sub-agents
-> /fleet "update all API routes to new
-  auth middleware, then run tests"
-
-# Plan before coding (toggle with Shift+Tab)
 > /plan "refactor rate limiter for Redis"
 
-# Single-shot / script mode
-copilot -p "summarize this week's commits" \
+> /fleet "update API routes to new auth middleware"
+
+copilot -p "summarize this week's commits"
   --allow-tool='shell(git)'</code></pre>
     <div>
       <h3>Built-in GitHub MCP</h3>
@@ -264,9 +263,9 @@ copilot -p "summarize this week's commits" \
 <!-- Pattern 3 — Coding Agent -->
 <section data-background-color="#0d1117">
   <h2>Pattern 3 — Copilot Coding Agent (async, GitHub-native)</h2>
-  <div class="two-col">
+  <div class="two-col tight-cards" style="gap:0.65em;">
     <div>
-      <p>Assign GitHub issues to Copilot. It opens a PR, runs CI, iterates on failures — without you watching.</p>
+      <p>Assign GitHub issues to Copilot. It opens a PR, runs CI, and iterates on failures asynchronously.</p>
       <pre><code class="language-bash"># Assign from CLI
 gh issue edit 42 --add-assignee "@copilot"
 
@@ -279,15 +278,15 @@ gh issue edit 42 --add-assignee "@copilot"
         <h3>Write great issue briefs</h3>
         <ul>
           <li>Context &amp; background</li>
-          <li>Specific constraints</li>
+          <li>Constraints</li>
           <li>Acceptance criteria</li>
-          <li>Files/modules to touch</li>
+          <li>Files/modules</li>
         </ul>
       </div>
       <div class="card">
         <h3>Review the PR, not the process</h3>
         <ul>
-          <li>Copilot explains its reasoning in the PR description</li>
+          <li>Reasoning appears in the PR description</li>
           <li>Comment on the PR to steer iterations</li>
         </ul>
       </div>
@@ -335,7 +334,6 @@ add a label and triage comment.</code></pre>
   <div style="font-size:2.5em;">⚡</div>
   <h1 class="green" style="font-size:2.2em; margin:0.2em 0 0.1em;">CLI vs IDE</h1>
   <p style="color:var(--gh-muted);">When to use each and how to get the most from both</p>
-  <span class="tag tag-green" style="margin-top:0.5em;">12 min</span>
 </section>
 
 <!-- Decision matrix -->
@@ -359,18 +357,11 @@ add a label and triage comment.</code></pre>
   <h2>New Copilot CLI — interactive &amp; programmatic</h2>
   <div class="two-col">
     <div>
-      <pre><code class="language-bash"># Interactive session
-copilot
-
-# Cloud sandbox (cross-device, persistent)
+      <pre><code class="language-bash">copilot
 copilot --cloud
-
-# Single-shot / script mode
 copilot -p "generate a changelog" \
   --allow-tool='shell(git)'
-
-# Toggle plan mode inside a session
-Shift+Tab</code></pre>
+Shift+Tab   # toggle /plan</code></pre>
     </div>
     <div>
       <h3>Key slash commands</h3>
@@ -391,37 +382,38 @@ Shift+Tab</code></pre>
 </section>
 
 <!-- IDE modes -->
-<section data-background-color="#0d1117">
+<section data-background-color="#0d1117" class="tight-cards tight-kb">
   <h2>IDE — Know your modes</h2>
-  <div class="three-col" style="margin-bottom:0.6em;">
+  <div class="three-col" style="margin-bottom:0.45em; gap:0.55em;">
     <div class="card">
       <h3>Plan mode</h3>
-      <p>Review &amp; approve blueprint <em>before</em> the agent writes code</p>
+      <p>Approve the blueprint <em>before</em> code is written</p>
     </div>
     <div class="card">
       <h3>Agent mode</h3>
-      <p>Multi-file edits · runs tests · validates results — fully autonomous</p>
+      <p>Handles multi-file edits, tests, and validation autonomously</p>
     </div>
     <div class="card">
       <h3>Inline chat <code>Cmd+I</code></h3>
-      <p>Quick edits &amp; explanations on a selection</p>
+      <p>Fast edits or explanations for a selection</p>
     </div>
   </div>
   <div class="two-col">
     <div>
       <h3>AGENTS.md — align all agents</h3>
-      <pre><code class="language-markdown"># repo root — respected by Copilot, Claude, Codex
-Use async/await only. Write Jest tests for every
-new function. Follow src/middleware/errors.js pattern.</code></pre>
+      <pre><code class="language-markdown"># AGENTS.md
+Use async/await only.
+Add Jest tests for new functions.
+Follow src/middleware/errors.js.</code></pre>
     </div>
     <div>
       <div class="card">
         <h3>Next edit suggestions</h3>
-        <p>Predicts the <em>next location</em> you'll edit and suggests it inline — accept with one click.</p>
+        <p>Predicts your <em>next edit location</em> and suggests it inline.</p>
       </div>
       <div class="card" style="margin-top:0.5em;">
         <h3>Third-party agents <span class="tag tag-blue" style="font-size:0.65em;">Pro+ / Enterprise</span></h3>
-        <p>Claude &amp; OpenAI Codex available in VS Code — no extra account needed.</p>
+        <p>Use Claude and OpenAI Codex in VS Code with no extra account.</p>
       </div>
     </div>
   </div>
@@ -474,7 +466,6 @@ new function. Follow src/middleware/errors.js pattern.</code></pre>
   <div style="font-size:2.5em;">🐙</div>
   <h1 class="purple" style="font-size:2.2em; margin:0.2em 0 0.1em;">GitHub Repos + MCP</h1>
   <p style="color:var(--gh-muted);">Navigating, cloning, personal repos &amp; Model Context Protocol</p>
-  <span class="tag tag-purple" style="margin-top:0.5em;">12 min</span>
 </section>
 
 <!-- Navigate repos -->
@@ -564,7 +555,7 @@ You are a senior TypeScript engineer. Always:
     </div>
     <div>
       <h3>Install in VS Code (easiest)</h3>
-      <p style="font-size:0.72em;">Browse the <strong>GitHub MCP Registry</strong> directly from the Extensions panel — no manual JSON editing needed.</p>
+      <p style="font-size:0.7em;">Browse the <strong>GitHub MCP Registry</strong> from Extensions — no manual JSON needed.</p>
       <h3 style="margin-top:0.5em;">Or add via User Settings JSON</h3>
       <pre><code class="language-json">{
   "github.copilot.chat.mcp.enabled": true,
@@ -572,14 +563,9 @@ You are a senior TypeScript engineer. Always:
     "servers": {
       "github": {
         "command": "npx",
-        "args": ["-y",
-          "@modelcontextprotocol/server-github"],
-        "env": { "GITHUB_PERSONAL_ACCESS_TOKEN":
-          "${env:GITHUB_TOKEN}" }
-      }
-    }
-  }
-}</code></pre>
+        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}" }
+      } } } }</code></pre>
     </div>
   </div>
   <div class="demo-cue">Install from MCP Registry in VS Code, then ask <code>@github "summarize the last 5 merged PRs"</code></div>
@@ -592,44 +578,32 @@ You are a senior TypeScript engineer. Always:
   <div style="font-size:2.5em;">⚙️</div>
   <h1 class="orange" style="font-size:2.2em; margin:0.2em 0 0.1em;">VS Code User Settings</h1>
   <p style="color:var(--gh-muted);">Configure once — apply to every project and chat session</p>
-  <span class="tag tag-orange" style="margin-top:0.5em;">8 min</span>
 </section>
 
 <!-- Settings that matter -->
 <section data-background-color="#0d1117">
   <h2>The settings that matter most</h2>
   <div class="callout" style="margin-bottom:0.4em;"><strong>Open:</strong> <code>Cmd+Shift+P</code> → "Open User Settings (JSON)" · Lives at <code>~/Library/Application Support/Code/User/settings.json</code></div>
-  <div class="two-col">
+  <div class="two-col tight-cards" style="gap:0.7em;">
     <pre><code class="language-json">{
-  // Inline suggestions
   "editor.inlineSuggest.enabled": true,
-  "github.copilot.editor
-    .enableAutoCompletions": true,
-
-  // Chat
+  "github.copilot.editor.enableAutoCompletions": true,
   "github.copilot.chat.followUps": "always",
   "github.copilot.chat.edits.enabled": true,
   "github.copilot.chat.agent.runTasks": true,
-
-  // Instruction files
-  "github.copilot.chat.codeGeneration
-    .useInstructionFiles": true,
-
-  // Full codebase indexing
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
   "github.copilot.chat.indexing.enabled": true,
-
-  // MCP
   "github.copilot.chat.mcp.enabled": true
 }</code></pre>
     <div>
-      <div class="callout orange">
+      <div class="callout orange" style="font-size:0.68em; line-height:1.45;">
         <strong>Priority order (high → low):</strong><br>
         1. Inline prompt instructions<br>
         2. Path-specific <code>.github/instructions/</code><br>
         3. <code>.github/copilot-instructions.md</code><br>
         4. <code>AGENTS.md</code><br>
         5. Org instructions (Business/Enterprise)<br>
-        6. <strong>User settings instructions array ← you set this globally</strong>
+        6. <strong>User settings instructions array (global)</strong>
       </div>
     </div>
   </div>
@@ -640,15 +614,9 @@ You are a senior TypeScript engineer. Always:
   <h2>Global instructions — the multiplier</h2>
   <p>Set team-wide defaults that apply to <strong>every chat session</strong> across all repos:</p>
   <pre><code class="language-json">"github.copilot.chat.codeGeneration.instructions": [
-  {
-    "text": "We use conventional commits. Always suggest messages in the format: type(scope): description"
-  },
-  {
-    "text": "Our stack: React 18, TypeScript strict, Vitest, Tailwind. Use these — not alternatives."
-  },
-  {
-    "text": "Always add error handling. Prefer async/await over .then()."
-  }
+  { "text": "We use conventional commits. Suggest: type(scope): description" },
+  { "text": "Our stack: React 18, TypeScript strict, Vitest, Tailwind — use these." },
+  { "text": "Always add error handling. Prefer async/await over .then()." }
 ]</code></pre>
   <div class="callout" style="margin-top:0.5em;">Combine with <code>.github/copilot-instructions.md</code> in each repo for fine-grained control.</div>
   <div class="demo-cue">Add one instruction, ask Copilot to write a commit message — show the before &amp; after</div>
@@ -660,7 +628,6 @@ You are a senior TypeScript engineer. Always:
 <section class="chapter" data-background-color="#0d1117">
   <div style="font-size:2.5em;">🚀</div>
   <h1 class="green" style="font-size:2.2em; margin:0.2em 0 0.1em;">Tips, Tricks &amp; Hidden Gems</h1>
-  <span class="tag tag-green" style="margin-top:0.5em;">7 min</span>
 </section>
 
 <!-- Sparkle moments + new features -->
@@ -717,9 +684,9 @@ How do I run it locally? Where do I add a new API endpoint?"</code></pre>
 </section>
 
 <!-- Quick reference -->
-<section data-background-color="#0d1117">
+<section data-background-color="#0d1117" class="tight-kb">
   <h2>Quick-reference card</h2>
-  <div class="three-col">
+  <div class="three-col" style="gap:0.55em;">
     <div>
       <h3>IDE shortcuts</h3>
       <div class="kbgrid">
@@ -733,7 +700,7 @@ How do I run it locally? Where do I add a new API endpoint?"</code></pre>
     <div>
       <h3>Copilot CLI</h3>
       <div class="kbgrid">
-        <span class="kb">copilot</span>        <span class="kbd">Interactive session</span>
+        <span class="kb">copilot</span>        <span class="kbd">Interactive CLI</span>
         <span class="kb">--cloud</span>        <span class="kbd">Cloud sandbox</span>
         <span class="kb">Shift+Tab</span>      <span class="kbd">Toggle plan mode</span>
         <span class="kb">/plan</span>          <span class="kbd">Blueprint first</span>
@@ -761,7 +728,6 @@ How do I run it locally? Where do I add a new API endpoint?"</code></pre>
 <section class="chapter" data-background-color="#0d1117">
   <div style="font-size:2.5em;">💬</div>
   <h1 style="font-size:2.2em; margin:0.2em 0 0.1em;">Q&amp;A</h1>
-  <p style="color:var(--gh-muted);">3 minutes</p>
 </section>
 
 <!-- Common questions -->
