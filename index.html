@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitHub Copilot Power Hour</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css" />
+  <style>
+    :root {
+      --gh-green: #2ea043;
+      --gh-blue: #58a6ff;
+      --gh-purple: #bc8cff;
+      --gh-orange: #f0883e;
+      --gh-bg: #0d1117;
+      --gh-surface: #161b22;
+      --gh-border: #30363d;
+      --gh-text: #e6edf3;
+      --gh-muted: #8b949e;
+    }
+
+    .reveal {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      color: var(--gh-text);
+    }
+
+    .reveal .slides section {
+      text-align: left;
+    }
+
+    /* Title slide — centered */
+    .reveal .slides section.center,
+    .reveal .slides section.title-slide {
+      text-align: center;
+    }
+
+    .reveal h1 {
+      font-size: 2.2em;
+      color: var(--gh-blue);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .reveal h2 {
+      font-size: 1.5em;
+      color: var(--gh-green);
+      font-weight: 600;
+      border-bottom: 2px solid var(--gh-border);
+      padding-bottom: 0.3em;
+      margin-bottom: 0.6em;
+    }
+
+    .reveal h3 {
+      font-size: 1.1em;
+      color: var(--gh-purple);
+      font-weight: 600;
+      margin-bottom: 0.4em;
+    }
+
+    .reveal p, .reveal li {
+      font-size: 0.82em;
+      line-height: 1.6;
+      color: var(--gh-text);
+    }
+
+    .reveal ul {
+      margin-left: 1.2em;
+    }
+
+    .reveal li {
+      margin-bottom: 0.35em;
+    }
+
+    .reveal pre {
+      background: var(--gh-surface);
+      border: 1px solid var(--gh-border);
+      border-radius: 6px;
+      font-size: 0.62em;
+      padding: 0;
+      box-shadow: none;
+      width: 100%;
+    }
+
+    .reveal code {
+      background: var(--gh-surface);
+      border: 1px solid var(--gh-border);
+      border-radius: 3px;
+      padding: 0.1em 0.35em;
+      font-size: 0.88em;
+      color: var(--gh-orange);
+    }
+
+    .reveal pre code {
+      background: transparent;
+      border: none;
+      padding: 1em;
+      color: var(--gh-text);
+    }
+
+    /* Tag / badge */
+    .tag {
+      display: inline-block;
+      background: var(--gh-surface);
+      border: 1px solid var(--gh-border);
+      border-radius: 2em;
+      padding: 0.15em 0.7em;
+      font-size: 0.7em;
+      color: var(--gh-muted);
+      vertical-align: middle;
+    }
+
+    .tag-green  { border-color: var(--gh-green);  color: var(--gh-green);  }
+    .tag-blue   { border-color: var(--gh-blue);   color: var(--gh-blue);   }
+    .tag-purple { border-color: var(--gh-purple);  color: var(--gh-purple); }
+    .tag-orange { border-color: var(--gh-orange);  color: var(--gh-orange); }
+
+    /* Grid layouts */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2em;
+      align-items: start;
+    }
+
+    .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1em;
+      align-items: start;
+    }
+
+    /* Card */
+    .card {
+      background: var(--gh-surface);
+      border: 1px solid var(--gh-border);
+      border-radius: 8px;
+      padding: 0.9em 1em;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 0.5em;
+    }
+
+    .card p, .card li {
+      font-size: 0.78em;
+      margin: 0;
+    }
+
+    .card ul { margin: 0.4em 0 0 1em; }
+
+    /* Highlight box */
+    .callout {
+      background: rgba(46, 160, 67, 0.12);
+      border-left: 3px solid var(--gh-green);
+      border-radius: 0 6px 6px 0;
+      padding: 0.6em 1em;
+      margin: 0.6em 0;
+      font-size: 0.8em;
+      color: var(--gh-text);
+    }
+
+    .callout.blue {
+      background: rgba(88, 166, 255, 0.1);
+      border-left-color: var(--gh-blue);
+    }
+
+    .callout.orange {
+      background: rgba(240, 136, 62, 0.1);
+      border-left-color: var(--gh-orange);
+    }
+
+    /* Table */
+    .reveal table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75em;
+    }
+
+    .reveal table th {
+      background: var(--gh-surface);
+      color: var(--gh-blue);
+      border: 1px solid var(--gh-border);
+      padding: 0.5em 0.8em;
+      text-align: left;
+    }
+
+    .reveal table td {
+      border: 1px solid var(--gh-border);
+      padding: 0.45em 0.8em;
+      color: var(--gh-text);
+    }
+
+    .reveal table tr:nth-child(even) td {
+      background: rgba(22, 27, 34, 0.5);
+    }
+
+    /* Timer badge on section openers */
+    .timer {
+      position: absolute;
+      top: 0.5em;
+      right: 0.5em;
+      font-size: 0.55em;
+      color: var(--gh-muted);
+      border: 1px solid var(--gh-border);
+      border-radius: 2em;
+      padding: 0.2em 0.8em;
+    }
+
+    /* Flow diagram */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+      font-size: 0.72em;
+      margin: 0.6em 0;
+      flex-wrap: wrap;
+    }
+
+    .flow-box {
+      background: var(--gh-surface);
+      border: 1px solid var(--gh-border);
+      border-radius: 6px;
+      padding: 0.4em 0.8em;
+      color: var(--gh-text);
+      white-space: nowrap;
+    }
+
+    .flow-box.green  { border-color: var(--gh-green);  color: var(--gh-green);  }
+    .flow-box.blue   { border-color: var(--gh-blue);   color: var(--gh-blue);   }
+    .flow-box.purple { border-color: var(--gh-purple); color: var(--gh-purple); }
+    .flow-arrow { color: var(--gh-muted); font-size: 1.2em; }
+
+    /* Demo cue */
+    .demo-cue {
+      background: rgba(188, 140, 255, 0.1);
+      border: 1px dashed var(--gh-purple);
+      border-radius: 6px;
+      padding: 0.5em 0.9em;
+      font-size: 0.7em;
+      color: var(--gh-purple);
+      margin-top: 0.8em;
+    }
+
+    .demo-cue::before { content: "👉 DEMO  "; font-weight: 700; }
+
+    /* Agenda row highlight */
+    .agenda-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.35em 0.6em;
+      border-radius: 4px;
+      font-size: 0.78em;
+    }
+
+    .agenda-row.active {
+      background: rgba(46, 160, 67, 0.15);
+      color: var(--gh-green);
+      font-weight: 600;
+    }
+
+    .reveal .slides > section > section {
+      padding: 0 2em;
+    }
+
+    .slide-number {
+      font-size: 0.55em;
+      color: var(--gh-muted);
+    }
+
+    /* shortcut grid */
+    .shortcut-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.25em 1em;
+      font-size: 0.72em;
+    }
+
+    .shortcut-key {
+      font-family: monospace;
+      background: var(--gh-surface);
+      border: 1px solid var(--gh-border);
+      border-radius: 4px;
+      padding: 0.1em 0.5em;
+      color: var(--gh-orange);
+      white-space: nowrap;
+    }
+
+    .shortcut-desc { color: var(--gh-muted); }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ══════════════════════════════════════════════════════
+         TITLE
+    ══════════════════════════════════════════════════════ -->
+    <section class="title-slide center" data-background-color="#0d1117">
+      <div style="margin-bottom:0.5em; font-size:3em;">🤖</div>
+      <h1 style="font-size:2.4em; margin-bottom:0.2em;">GitHub Copilot</h1>
+      <h1 style="font-size:2.4em; color: var(--gh-green); margin-top:0;">Power Hour</h1>
+      <p style="color: var(--gh-muted); font-size:0.9em; margin-top:1.5em;">
+        Multi-agent workflows · CLI vs IDE · Repos &amp; MCP · Settings · Tips &amp; tricks
+      </p>
+      <p style="color: var(--gh-muted); font-size:0.7em; margin-top:3em;">
+        Use <kbd style="background:#161b22;border:1px solid #30363d;padding:2px 8px;border-radius:4px;">Space</kbd> or arrow keys to navigate
+      </p>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         AGENDA
+    ══════════════════════════════════════════════════════ -->
+    <section data-background-color="#0d1117">
+      <h2>Agenda</h2>
+      <div style="margin-top:0.8em;">
+        <div class="agenda-row active">
+          <span>🔗 Multi-agent orchestration</span><span class="tag tag-blue">0:03 — 15 min</span>
+        </div>
+        <div class="agenda-row" style="margin-top:0.3em;">
+          <span>⚡ CLI vs IDE — when &amp; how</span><span class="tag">0:18 — 12 min</span>
+        </div>
+        <div class="agenda-row" style="margin-top:0.3em;">
+          <span>🐙 GitHub repos crash course + MCP</span><span class="tag">0:30 — 12 min</span>
+        </div>
+        <div class="agenda-row" style="margin-top:0.3em;">
+          <span>⚙️ VS Code user-level settings</span><span class="tag">0:42 — 8 min</span>
+        </div>
+        <div class="agenda-row" style="margin-top:0.3em;">
+          <span>🚀 Tips, tricks &amp; hidden gems</span><span class="tag">0:50 — 7 min</span>
+        </div>
+        <div class="agenda-row" style="margin-top:0.3em;">
+          <span>💬 Q&amp;A</span><span class="tag">0:57 — 3 min</span>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:1.2em;">
+        <strong>Key idea:</strong> Copilot isn't just autocomplete — it's a <em>platform</em>. Today we close the gap between "I have Copilot" and "I use Copilot well."
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         SECTION 1 — MULTI-AGENT
+    ══════════════════════════════════════════════════════ -->
+    <section data-background-color="#0d1117">
+
+      <!-- Section opener -->
+      <section class="center" data-background-color="#0d1117">
+        <div style="font-size:3em; margin-bottom:0.3em;">🔗</div>
+        <h1 style="color: var(--gh-blue);">Multi-Agent<br>Orchestration</h1>
+        <p style="color: var(--gh-muted);">Chaining multiple agents &amp; tools in a single workflow</p>
+        <span class="tag tag-blue">15 min</span>
+      </section>
+
+      <!-- What is it -->
+      <section data-background-color="#0d1117">
+        <h2>What is agent orchestration?</h2>
+        <p>Copilot can run <strong>specialized agents in sequence or parallel</strong> — each handles a focused sub-task and passes context to the next.</p>
+        <div style="margin:1em 0;">
+          <div class="flow">
+            <div class="flow-box">User request</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-box green">Explore agent<br><small style="color:var(--gh-muted)">research</small></div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-box blue">Edit agent<br><small style="color:var(--gh-muted)">implement</small></div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-box purple">Test agent<br><small style="color:var(--gh-muted)">verify</small></div>
+          </div>
+        </div>
+        <div class="two-col" style="margin-top:0.6em;">
+          <div class="card">
+            <h3>Why it matters</h3>
+            <ul>
+              <li>Single prompts hit context limits on large tasks</li>
+              <li>Specialists outperform generalists on focused work</li>
+              <li>Independent work streams run in parallel</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Mental model shift</h3>
+            <ul>
+              <li><del style="color:var(--gh-muted)">One giant prompt</del> → Research → Implement → Verify</li>
+              <li><del style="color:var(--gh-muted)">Re-explain every time</del> → Use <code>#codebase</code></li>
+              <li><del style="color:var(--gh-muted)">Watch Copilot work</del> → Assign async, review later</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pattern 1: Implicit -->
+      <section data-background-color="#0d1117">
+        <h2>Pattern 1 — Implicit orchestration</h2>
+        <p>Describe a complex task in VS Code Chat. Copilot invokes tools automatically.</p>
+        <pre><code class="language-text">Refactor the auth module: find all usages, update them to
+use the new JWT interface, then run the tests and fix failures.</code></pre>
+        <p style="margin-top:0.7em;">Watch the <strong>tool calls</strong> unfold in the chat sidebar:</p>
+        <div class="flow" style="margin:0.5em 0;">
+          <div class="flow-box green">search_codebase</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box blue">edit_file ×N</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box purple">run_terminal</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box green">edit_file (fixes)</div>
+        </div>
+        <div class="demo-cue">Show a multi-step task in VS Code Chat — watch the tool call chain in the sidebar</div>
+      </section>
+
+      <!-- Pattern 2: CLI chaining -->
+      <section data-background-color="#0d1117">
+        <h2>Pattern 2 — CLI chaining</h2>
+        <p>Use <code>gh copilot</code> to build context, then feed it forward.</p>
+        <pre><code class="language-bash"># Step 1 — understand the system
+gh copilot explain "how does our rate limiter work"
+
+# Step 2 — use that context in your next prompt
+gh copilot suggest "add retry logic to the HTTP client \
+  based on the rate limiter pattern"</code></pre>
+        <div class="callout blue" style="margin-top:0.8em;">
+          💡 Shell aliases save time — add these to <code>~/.zshrc</code>:<br>
+          <code>alias cops='gh copilot suggest'</code><br>
+          <code>alias cope='gh copilot explain'</code>
+        </div>
+      </section>
+
+      <!-- Pattern 3: Coding Agent -->
+      <section data-background-color="#0d1117">
+        <h2>Pattern 3 — Coding Agent (async)</h2>
+        <p>Assign GitHub issues directly to Copilot. It opens a PR, runs CI, iterates on failures — without you watching.</p>
+        <pre><code class="language-bash"># Assign an issue to the coding agent
+gh issue edit 42 --add-assignee "@copilot"
+
+# Or from GitHub.com: Assignees → Copilot</code></pre>
+        <div class="two-col" style="margin-top:0.8em;">
+          <div class="card">
+            <h3>Write great issue briefs</h3>
+            <ul>
+              <li>Context &amp; background</li>
+              <li>Specific constraints</li>
+              <li>Acceptance criteria</li>
+              <li>Files/modules to touch</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Review the PR, not the process</h3>
+            <ul>
+              <li>Copilot explains its reasoning in the PR description</li>
+              <li>CI runs automatically</li>
+              <li>Comment on the PR to steer iterations</li>
+            </ul>
+          </div>
+        </div>
+        <div class="demo-cue">Assign a real issue to @copilot and show the resulting PR</div>
+      </section>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         SECTION 2 — CLI VS IDE
+    ══════════════════════════════════════════════════════ -->
+    <section data-background-color="#0d1117">
+
+      <section class="center" data-background-color="#0d1117">
+        <div style="font-size:3em; margin-bottom:0.3em;">⚡</div>
+        <h1 style="color: var(--gh-green);">CLI vs IDE</h1>
+        <p style="color: var(--gh-muted);">When to use each and how to get the most from both</p>
+        <span class="tag tag-green">12 min</span>
+      </section>
+
+      <!-- Decision matrix -->
+      <section data-background-color="#0d1117">
+        <h2>Where are you working?</h2>
+        <table>
+          <thead>
+            <tr><th>Situation</th><th>Best tool</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Writing / editing code</td><td><span class="tag tag-blue">IDE — inline suggestions</span></td></tr>
+            <tr><td>Already in terminal, need a quick answer</td><td><span class="tag tag-green">CLI — <code>gh copilot suggest</code></span></td></tr>
+            <tr><td>Long multi-file refactor</td><td><span class="tag tag-blue">IDE — Edits mode</span></td></tr>
+            <tr><td>Running commands you half-remember</td><td><span class="tag tag-green">CLI — <code>suggest</code></span></td></tr>
+            <tr><td>Reviewing a PR, quick context lookup</td><td><span class="tag tag-green">CLI</span></td></tr>
+            <tr><td>Scaffolding a new feature from scratch</td><td><span class="tag tag-blue">IDE + Coding Agent</span></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- CLI deep dive -->
+      <section data-background-color="#0d1117">
+        <h2>CLI — Two commands, infinite use cases</h2>
+        <pre><code class="language-bash"># Install / verify
+gh extension install github/gh-copilot
+gh copilot --version
+
+# suggest — "what command do I need?"
+gh copilot suggest "find files modified in last 7 days larger than 10MB"
+
+# explain — "what does this do?"
+gh copilot explain "awk '{print $2}' | sort | uniq -c | sort -rn"
+
+# Target a specific context
+gh copilot suggest -t shell   # shell command
+gh copilot suggest -t git     # git command
+gh copilot suggest -t gh      # GitHub CLI command</code></pre>
+        <div class="demo-cue">Live terminal — suggest a complex git command, then explain a scary one-liner</div>
+      </section>
+
+      <!-- IDE deep dive -->
+      <section data-background-color="#0d1117">
+        <h2>IDE — Know your modes</h2>
+        <div class="three-col">
+          <div class="card">
+            <h3>Inline Chat</h3>
+            <p><code>Cmd+I</code></p>
+            <p style="margin-top:0.4em; color:var(--gh-muted)">Quick edits &amp; explanations on a selection</p>
+          </div>
+          <div class="card">
+            <h3>Panel Chat</h3>
+            <p><code>Cmd+Shift+I</code></p>
+            <p style="margin-top:0.4em; color:var(--gh-muted)">Multi-turn conversations with full context</p>
+          </div>
+          <div class="card">
+            <h3>Edits Mode</h3>
+            <p><code>Cmd+Shift+P</code><br><small>→ "Copilot Edits"</small></p>
+            <p style="margin-top:0.4em; color:var(--gh-muted)">Multi-file changes in one session</p>
+          </div>
+        </div>
+        <h3 style="margin-top:1em;">Context references — use <code>#</code></h3>
+        <pre><code class="language-text">@workspace  "Find all API endpoints missing auth middleware"
+#file:src/routes/users.ts  "Why is this returning 403?"
+#codebase   "How is logging configured?"
+#selection  "Refactor this to use async/await"</code></pre>
+        <div class="demo-cue">Use @workspace for a cross-file question, then switch to Edits mode to apply the fix</div>
+      </section>
+
+      <!-- Chat participants -->
+      <section data-background-color="#0d1117">
+        <h2>Chat participants you should know</h2>
+        <div class="two-col">
+          <div>
+            <div class="card" style="margin-bottom:0.6em;">
+              <h3>@workspace</h3>
+              <p>Full repo awareness — semantic search across all files</p>
+            </div>
+            <div class="card" style="margin-bottom:0.6em;">
+              <h3>@github</h3>
+              <p>PRs, issues, code search — requires GitHub sign-in</p>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:0.6em;">
+              <h3>@terminal</h3>
+              <p>Current terminal state, last command output, errors</p>
+            </div>
+            <div class="card">
+              <h3>@vscode</h3>
+              <p>Settings, commands, extension questions</p>
+            </div>
+          </div>
+        </div>
+        <div class="callout orange" style="margin-top:0.8em;">
+          <strong>Pro tip:</strong> Combine them — <code>@workspace #file:src/api.ts "explain this to a new team member"</code>
+        </div>
+      </section>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         SECTION 3 — GITHUB REPOS + MCP
+    ══════════════════════════════════════════════════════ -->
+    <section data-background-color="#0d1117">
+
+      <section class="center" data-background-color="#0d1117">
+        <div style="font-size:3em; margin-bottom:0.3em;">🐙</div>
+        <h1 style="color: var(--gh-purple);">GitHub Repos<br>+ MCP</h1>
+        <p style="color: var(--gh-muted);">Navigating, cloning, personal repos &amp; model context protocol</p>
+        <span class="tag tag-purple">12 min</span>
+      </section>
+
+      <!-- Nav shortcuts -->
+      <section data-background-color="#0d1117">
+        <h2>Navigate repos like a pro</h2>
+        <div class="two-col">
+          <div>
+            <h3>Keyboard shortcuts on GitHub.com</h3>
+            <div class="shortcut-grid">
+              <span class="shortcut-key">T</span><span class="shortcut-desc">Fuzzy file finder</span>
+              <span class="shortcut-key">.</span><span class="shortcut-desc">Open in github.dev (VS Code in browser)</span>
+              <span class="shortcut-key">Cmd+K</span><span class="shortcut-desc">Command palette — search everything</span>
+            </div>
+            <h3 style="margin-top:0.8em;">Clone the right way</h3>
+            <pre><code class="language-bash"># via gh CLI (handles auth automatically)
+gh repo clone org/repo
+
+# Fork + clone in one command
+gh repo fork org/repo --clone</code></pre>
+          </div>
+          <div>
+            <h3>Powerful search syntax</h3>
+            <pre><code class="language-text"># Open TypeScript files in your org
+org:your-org language:typescript is:open
+
+# Code search
+path:src/api extension:ts "async function"
+
+# Recent merged PRs
+repo:org/repo is:pr merged \
+  created:>2024-01-01</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Personal repos as config layer -->
+      <section data-background-color="#0d1117">
+        <h2>Your personal repo = Copilot config layer</h2>
+        <div class="callout" style="margin-bottom:0.8em;">
+          Your GitHub account is a <strong>superpower</strong> for Copilot customization — store your persona, prompts, and settings there.
+        </div>
+        <div class="two-col">
+          <div>
+            <pre><code class="language-text">my-copilot-config/
+├── .github/
+│   └── copilot-instructions.md
+├── prompts/
+│   ├── code-review.md
+│   ├── pr-description.md
+│   └── standup-summary.md
+└── settings/
+    └── vscode-settings.json</code></pre>
+          </div>
+          <div>
+            <h3><code>.github/copilot-instructions.md</code></h3>
+            <pre><code class="language-markdown">You are a senior TypeScript engineer.
+Always:
+- Prefer `const` over `let`
+- Add JSDoc to exported functions
+- Suggest error boundaries for React
+- Flag any `any` types with a comment</code></pre>
+            <p style="color:var(--gh-muted); font-size:0.7em; margin-top:0.4em;">
+              ✅ Auto-loaded for every repo you own
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- MCP -->
+      <section data-background-color="#0d1117">
+        <h2>MCP — Reach outside the codebase</h2>
+        <div class="two-col">
+          <div>
+            <div class="callout blue">
+              <strong>Without MCP:</strong> Copilot knows your code<br>
+              <strong>With MCP:</strong> Copilot knows your code + tickets + docs + data
+            </div>
+            <h3 style="margin-top:0.8em;">Quick-win servers</h3>
+            <table>
+              <thead><tr><th>Server</th><th>Adds</th></tr></thead>
+              <tbody>
+                <tr><td><code>server-github</code></td><td>Issues, PRs, API</td></tr>
+                <tr><td><code>server-filesystem</code></td><td>Files outside workspace</td></tr>
+                <tr><td><code>server-postgres</code></td><td>Query your dev DB</td></tr>
+                <tr><td><code>server-slack</code></td><td>Channel context</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h3>Enable in User Settings JSON</h3>
+            <pre><code class="language-json">{
+  "github.copilot.chat.mcp.enabled": true,
+  "mcp": {
+    "servers": {
+      "github": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-github"
+        ],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN":
+            "${env:GITHUB_TOKEN}"
+        }
+      }
+    }
+  }
+}</code></pre>
+          </div>
+        </div>
+        <div class="demo-cue">Add the GitHub MCP server, then ask <code>@github "summarize the last 5 merged PRs"</code></div>
+      </section>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         SECTION 4 — VS CODE SETTINGS
+    ══════════════════════════════════════════════════════ -->
+    <section data-background-color="#0d1117">
+
+      <section class="center" data-background-color="#0d1117">
+        <div style="font-size:3em; margin-bottom:0.3em;">⚙️</div>
+        <h1 style="color: var(--gh-orange);">VS Code<br>User Settings</h1>
+        <p style="color: var(--gh-muted);">Configure once — apply to every project and chat session</p>
+        <span class="tag tag-orange">8 min</span>
+      </section>
+
+      <!-- Where to find it -->
+      <section data-background-color="#0d1117">
+        <h2>User settings — configure once, use everywhere</h2>
+        <div class="callout" style="margin-bottom:0.8em;">
+          <strong>Open:</strong> <code>Cmd+Shift+P</code> → "Open User Settings (JSON)"<br>
+          <strong>Location (macOS):</strong> <code>~/Library/Application Support/Code/User/settings.json</code>
+        </div>
+        <div class="callout orange">
+          <strong>Priority order (highest → lowest):</strong><br>
+          1. Inline instructions in the prompt<br>
+          2. <code>.github/copilot-instructions.md</code> (repo-level)<br>
+          3. User settings instructions array (global ← <em>you control this</em>)
+        </div>
+        <div class="demo-cue">Open User Settings JSON live and walk through the file structure</div>
+      </section>
+
+      <!-- Settings that matter -->
+      <section data-background-color="#0d1117">
+        <h2>The settings that matter most</h2>
+        <pre><code class="language-json">{
+  // Inline suggestions
+  "editor.inlineSuggest.enabled": true,
+  "github.copilot.editor.enableAutoCompletions": true,
+
+  // Chat behavior
+  "github.copilot.chat.followUps": "always",
+  "github.copilot.chat.edits.enabled": true,
+  "github.copilot.chat.agent.runTasks": true,
+
+  // Instruction files
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+
+  // Full codebase indexing
+  "github.copilot.chat.indexing.enabled": true,
+
+  // MCP
+  "github.copilot.chat.mcp.enabled": true
+}</code></pre>
+      </section>
+
+      <!-- Global instructions -->
+      <section data-background-color="#0d1117">
+        <h2>Global instructions — the multiplier</h2>
+        <p>Set team-wide defaults that apply to <strong>every chat session</strong>:</p>
+        <pre><code class="language-json">"github.copilot.chat.codeGeneration.instructions": [
+  {
+    "text": "We use conventional commits. Always suggest messages
+             in the format: type(scope): description"
+  },
+  {
+    "text": "Our stack: React 18, TypeScript strict, Vitest, Tailwind.
+             Use these — not alternatives."
+  },
+  {
+    "text": "Always add error handling. Prefer async/await over .then()."
+  }
+]</code></pre>
+        <div class="demo-cue">Add one instruction, ask Copilot to write a commit message — before &amp; after</div>
+      </section>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         SECTION 5 — TIPS & TRICKS
+    ══════════════════════════════════════════════════════ -->
+    <section data-background-color="#0d1117">
+
+      <section class="center" data-background-color="#0d1117">
+        <div style="font-size:3em; margin-bottom:0.3em;">🚀</div>
+        <h1 style="color: var(--gh-green);">Tips, Tricks<br>&amp; Hidden Gems</h1>
+        <span class="tag tag-green">7 min</span>
+      </section>
+
+      <!-- Slash commands + built-in tricks -->
+      <section data-background-color="#0d1117">
+        <h2>Slash commands &amp; quick wins</h2>
+        <div class="two-col">
+          <div>
+            <h3>Slash commands</h3>
+            <div class="shortcut-grid">
+              <span class="shortcut-key">/fix</span><span class="shortcut-desc">Fix selected code</span>
+              <span class="shortcut-key">/explain</span><span class="shortcut-desc">Explain what it does</span>
+              <span class="shortcut-key">/tests</span><span class="shortcut-desc">Generate tests for selection</span>
+              <span class="shortcut-key">/doc</span><span class="shortcut-desc">Add documentation</span>
+              <span class="shortcut-key">/new</span><span class="shortcut-desc">Scaffold a new file/component</span>
+            </div>
+          </div>
+          <div>
+            <h3>Built-in sparkle ✨ moments</h3>
+            <ul>
+              <li><strong>Commit messages</strong> — click ✨ in Source Control panel</li>
+              <li><strong>PR descriptions</strong> — click "Copilot" when creating a PR</li>
+              <li><strong>Terminal errors</strong> — click ✨ next to failed command for instant fix</li>
+              <li><strong>Kebab menu <code>···</code></strong> in chat — "Insert into Terminal" / "Insert at Cursor"</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top:0.8em;">
+          <code>@workspace /new "React data table with sorting and pagination"</code>
+        </div>
+      </section>
+
+      <!-- 3 Power Workflows -->
+      <section data-background-color="#0d1117">
+        <h2>3 power workflows</h2>
+        <div class="card" style="margin-bottom:0.7em;">
+          <h3>☀️ Morning Standup Flow</h3>
+          <pre><code class="language-bash">gh copilot suggest "show my git commits from yesterday across all repos"
+# or in chat:
+# "@github summarize my merged PRs and closed issues from last 24 hours"</code></pre>
+        </div>
+        <div class="card" style="margin-bottom:0.7em;">
+          <h3>🦆 Rubber Duck Review</h3>
+          <pre><code class="language-text">Before submitting a PR — paste your diff and ask:
+"Review this for: security issues, missing error handling,
+ performance problems, and anything that'll get flagged in review."</code></pre>
+        </div>
+        <div class="card">
+          <h3>🧭 Onboarding Accelerator</h3>
+          <pre><code class="language-text">@workspace "Give me a tour: What does this do? Main modules?
+How do I run it locally? Where would I add a new API endpoint?"</code></pre>
+        </div>
+      </section>
+
+      <!-- Quick reference card -->
+      <section data-background-color="#0d1117">
+        <h2>Quick-reference card</h2>
+        <div class="two-col">
+          <div>
+            <h3>Shortcuts</h3>
+            <div class="shortcut-grid">
+              <span class="shortcut-key">Cmd+I</span><span class="shortcut-desc">Inline chat</span>
+              <span class="shortcut-key">Cmd+Shift+I</span><span class="shortcut-desc">Chat panel</span>
+              <span class="shortcut-key">Tab</span><span class="shortcut-desc">Accept suggestion</span>
+              <span class="shortcut-key">Escape</span><span class="shortcut-desc">Dismiss suggestion</span>
+              <span class="shortcut-key">Alt+]</span><span class="shortcut-desc">Next suggestion</span>
+              <span class="shortcut-key">Alt+[</span><span class="shortcut-desc">Previous suggestion</span>
+            </div>
+            <h3 style="margin-top:0.8em;">CLI</h3>
+            <div class="shortcut-grid">
+              <span class="shortcut-key">cops "..."</span><span class="shortcut-desc">Suggest a command</span>
+              <span class="shortcut-key">cope "..."</span><span class="shortcut-desc">Explain a command</span>
+            </div>
+          </div>
+          <div>
+            <h3>Context references</h3>
+            <div class="shortcut-grid">
+              <span class="shortcut-key">@workspace</span><span class="shortcut-desc">Full repo context</span>
+              <span class="shortcut-key">@github</span><span class="shortcut-desc">PRs, Issues, Search</span>
+              <span class="shortcut-key">@terminal</span><span class="shortcut-desc">Current terminal state</span>
+              <span class="shortcut-key">#file:path</span><span class="shortcut-desc">Attach specific file</span>
+              <span class="shortcut-key">#selection</span><span class="shortcut-desc">Selected code</span>
+              <span class="shortcut-key">#codebase</span><span class="shortcut-desc">Semantic code search</span>
+            </div>
+            <h3 style="margin-top:0.8em;">Slash commands</h3>
+            <p style="font-size:0.75em; color:var(--gh-muted);">
+              <code>/fix</code> &nbsp; <code>/explain</code> &nbsp; <code>/tests</code> &nbsp; <code>/doc</code> &nbsp; <code>/new</code>
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         Q&A
+    ══════════════════════════════════════════════════════ -->
+    <section data-background-color="#0d1117">
+
+      <section class="center" data-background-color="#0d1117">
+        <div style="font-size:3em; margin-bottom:0.3em;">💬</div>
+        <h1>Q&amp;A</h1>
+        <p style="color:var(--gh-muted);">3 minutes</p>
+      </section>
+
+      <section data-background-color="#0d1117">
+        <h2>Common questions</h2>
+        <div class="card" style="margin-bottom:0.6em;">
+          <h3>Is Copilot sending my code to the cloud?</h3>
+          <p>Copilot uses code as context for suggestions. Enterprise plans include IP indemnity and data privacy controls. Check your org's policy.</p>
+        </div>
+        <div class="card" style="margin-bottom:0.6em;">
+          <h3>How do I stop inline suggestions mid-typing?</h3>
+          <p><code>Cmd+Shift+P</code> → "Copilot: Toggle Inline Suggestions" — or set <code>"github.copilot.editor.enableAutoCompletions": false</code></p>
+        </div>
+        <div class="card">
+          <h3>Individual vs Business vs Enterprise?</h3>
+          <p><strong>Individual:</strong> personal, basic features &nbsp;·&nbsp; <strong>Business:</strong> org management, audit logs, policy controls &nbsp;·&nbsp; <strong>Enterprise:</strong> fine-tuned models, Knowledge Bases, strict data controls</p>
+        </div>
+      </section>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         RESOURCES
+    ══════════════════════════════════════════════════════ -->
+    <section class="center" data-background-color="#0d1117">
+      <h2>Resources</h2>
+      <table style="margin: 0 auto; max-width:700px;">
+        <thead><tr><th>Resource</th><th>URL</th></tr></thead>
+        <tbody>
+          <tr><td>Copilot Docs</td><td><a href="https://docs.github.com/en/copilot" style="color:var(--gh-blue);">docs.github.com/en/copilot</a></td></tr>
+          <tr><td>MCP Servers</td><td><a href="https://github.com/modelcontextprotocol/servers" style="color:var(--gh-blue);">github.com/modelcontextprotocol/servers</a></td></tr>
+          <tr><td>VS Code Copilot reference</td><td><a href="https://code.visualstudio.com/docs/copilot/reference" style="color:var(--gh-blue);">code.visualstudio.com/docs/copilot/reference</a></td></tr>
+          <tr><td>gh copilot extension</td><td><a href="https://github.com/github/gh-copilot" style="color:var(--gh-blue);">github.com/github/gh-copilot</a></td></tr>
+          <tr><td>Custom instructions guide</td><td><a href="https://docs.github.com/en/copilot/customizing-copilot/adding-custom-instructions" style="color:var(--gh-blue);">docs.github.com › adding-custom-instructions</a></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:2em; color:var(--gh-muted); font-size:0.7em;">
+        Slide source: <a href="https://github.com/beardofedu/copilot-power-hour" style="color:var(--gh-blue);">github.com/beardofedu/copilot-power-hour</a>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    center: false,
+    width: 1200,
+    height: 700,
+    margin: 0.06,
+    plugins: [RevealHighlight, RevealNotes],
+    highlight: {
+      highlightOnLoad: true,
+    }
+  });
+</script>
+</body>
+</html>
