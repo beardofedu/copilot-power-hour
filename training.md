@@ -50,11 +50,11 @@ User request
 **Why it matters:**
 - Single prompts hit context limits on large tasks
 - Specialists outperform generalists on focused sub-tasks
-- You can parallelize independent work streams
+- You can parallelize independent work streams with `/fleet`
 
 ---
 
-### How to trigger it — 3 patterns (8 min)
+### How to trigger it — 4 patterns (10 min)
 
 #### Pattern 1: Let Copilot decide (implicit orchestration)
 In VS Code Chat, just describe a complex task. Copilot will invoke tools automatically:
@@ -71,10 +71,14 @@ the new JWT interface, then run the tests and fix any failures."
 #### Pattern 2: Explicit tool chaining in the CLI
 
 ```bash
-# Chain: research → implement → verify
-gh copilot explain "how does our rate limiter work"
-# Then use that context in your next prompt
-gh copilot suggest "add retry logic to the HTTP client based on the rate limiter pattern"
+# New standalone Copilot CLI — start an interactive session
+copilot
+
+# Use /fleet to split complex work into parallel sub-agents
+> /fleet "update all API routes to use the new auth middleware, then run tests"
+
+# Use plan mode (Shift+Tab) to plan before executing
+> /plan "refactor the rate limiter to support Redis as a backend"
 ```
 
 ---
@@ -95,6 +99,29 @@ Copilot opens a PR, runs CI, iterates on failures — all without you watching.
 - Write issues like you'd brief a junior dev (context, constraints, acceptance criteria)
 - Use labels to scope: `copilot`, `good first issue`
 - Review the PR diff, not the process — Copilot shows its work in the PR description
+
+---
+
+#### Pattern 4: GitHub Agentic Workflows (Public Preview)
+Define AI automations as Markdown files — Copilot compiles them to hardened GitHub Actions workflows:
+
+```yaml
+---
+# .github/workflows/triage.workflow.md
+on: issues
+permissions:
+  issues: write
+safe-outputs:
+  - add-comment
+max-ai-credits: 500
+---
+When a new issue is opened, analyze it and add a label
+and a brief triage comment explaining the priority.
+```
+
+- Supports Copilot, Claude, Codex, and Gemini as engines
+- Read-only by default; explicit `safe-outputs` required for write actions
+- Costs: 1 AI Credit = $0.01 USD; default cap 1,000 AIC per run
 
 ---
 
@@ -127,40 +154,56 @@ Copilot opens a PR, runs CI, iterates on failures — all without you watching.
 
 ### CLI Deep Dive (5 min)
 
+> ⚠️ **The old `gh copilot` extension is retired.** It has been replaced by the new **standalone GitHub Copilot CLI**.
+
 Install / verify:
 ```bash
-gh extension install github/gh-copilot
-gh copilot --version
+# Install via npm (or see docs for binary install)
+npm install -g @github/copilot-cli
+
+# Launch an interactive session
+copilot
+
+# Or run a single prompt (programmatic mode)
+copilot -p "Show this week's commits and summarize them" --allow-tool='shell(git)'
 ```
 
-**Two main commands:**
+**Key slash commands inside the CLI:**
 
+| Command | What it does |
+|---------|-------------|
+| `/plan` | Plan mode — builds a blueprint *before* writing code |
+| `/fleet` | Splits work into parallel sub-agents and combines results |
+| `/research` | In-depth research assistant mode |
+| `/chronicle` | Searchable session history; generate standup reports |
+| `/compact` | Manually compress context to extend the session |
+| `/context` | Show token usage breakdown |
+| `/sandbox` | Enable local filesystem/network sandboxing |
+| `/pr` | View, create, and fix PRs from the CLI |
+| `/model` | Switch AI model mid-session |
+| `/mcp` | List configured MCP servers |
+
+**Power modes:**
 ```bash
-# 1. suggest — "what command do I need?"
-gh copilot suggest "find all files modified in the last 7 days larger than 10MB"
+# Cloud sandbox — isolated, cross-device, persistent state
+copilot --cloud
 
-# 2. explain — "what does this command do?"
-gh copilot explain "awk '{print $2}' | sort | uniq -c | sort -rn"
+# Programmatic / script-friendly
+copilot -p "generate a changelog from git log" --allow-tool='shell(git)'
+
+# Toggle plan mode inside a session
+Shift+Tab   ← switch between ask/execute and plan mode
 ```
 
-**Pro tip — shell alias:**
+**Built-in GitHub MCP server** — no configuration needed:
 ```bash
-# Add to ~/.zshrc or ~/.bashrc
-alias cops='gh copilot suggest'
-alias cope='gh copilot explain'
-
-# Now:
-cops "compress a directory excluding node_modules"
+# GitHub MCP is pre-connected in the CLI
+> Browse my open PRs
+> Find good first issues in org/repo
+> Create a branch and push it
 ```
 
-**Interactive mode flags:**
-```bash
-gh copilot suggest -t shell   # force shell command context
-gh copilot suggest -t git     # git command context
-gh copilot suggest -t gh      # GitHub CLI context
-```
-
-👉 **Demo:** Live terminal — suggest a complex git command, then explain a scary-looking one-liner
+👉 **Demo:** Launch `copilot`, use `/plan` on a small task, then `/fleet` to parallelize sub-tasks
 
 ---
 
@@ -172,12 +215,35 @@ gh copilot suggest -t gh      # GitHub CLI context
 |------|---------|---------|
 | Inline chat | `Cmd+I` | Quick edits, explain selection |
 | Panel chat | `Cmd+Shift+I` or sidebar | Multi-turn conversations |
-| Edits mode | `Cmd+Shift+P` → "Copilot Edits" | Multi-file changes |
+| **Plan mode** | Chat → select "Plan" | Review a blueprint *before* the agent codes |
+| **Agent mode** | Chat → select "Agent" | Multi-file edits, runs tests, validates results |
+| Edits mode | `Cmd+Shift+P` → "Copilot Edits" | Focused multi-file changes |
+
+**Plan mode** — "strategy before code":
+> Review and approve the full implementation plan before Copilot writes a single line.
+
+**Agent mode** — "from prompt to project":
+> Analyzes code, proposes edits, runs tests, and validates results across multiple files autonomously.
+
+**AGENTS.md** — align all agents to your project standards:
+```markdown
+# AGENTS.md  ← place in repo root
+You are working on a Node.js REST API. Always:
+- Use async/await, never callbacks
+- Write Jest tests for every new function
+- Follow the existing error-handling pattern in src/middleware/errors.js
+```
+> This file is respected by Copilot, Claude, Codex, and other agents.
+
+**Next edit suggestions** — predictive edits as you type:
+> Copilot predicts the *next place* you'll need to edit and suggests it inline. Accept with a single click.
+
+**Third-party agents (Pro+ and Enterprise):**
+> Claude by Anthropic and OpenAI Codex are available directly in VS Code — no extra account needed.
 
 **Context is everything — use `#` references:**
 ```
-# In chat:
-@workspace "Find all API endpoints that don't have auth middleware" 
+@workspace "Find all API endpoints that don't have auth middleware"
 #file:src/routes/users.ts "Why is this endpoint returning 403?"
 #codebase "How is logging configured?"
 ```
@@ -188,7 +254,7 @@ gh copilot suggest -t gh      # GitHub CLI context
 - `@terminal` — terminal context
 - `@github` — PRs, issues, code search (requires sign-in)
 
-👉 **Demo:** Use `@workspace` to answer a cross-file question, then switch to Edits mode to make the change
+👉 **Demo:** Show Plan mode producing a blueprint for a new feature, then Agent mode executing it across multiple files
 
 ---
 
@@ -233,14 +299,24 @@ gh repo fork org/repo --clone
 ```
 my-copilot-config/
 ├── .github/
-│   └── copilot-instructions.md   ← your persistent Copilot persona
+│   ├── copilot-instructions.md   ← repo-wide Copilot persona
+│   └── instructions/
+│       └── api.instructions.md   ← path-specific (applies to src/api/**)
+├── AGENTS.md                      ← instructions for ALL agents (Copilot, Claude, Codex)
 ├── prompts/
-│   ├── code-review.md            ← reusable prompt templates  
+│   ├── code-review.md            ← reusable prompt templates
 │   ├── pr-description.md
 │   └── standup-summary.md
 └── settings/
     └── vscode-settings.json      ← your portable VS Code config
 ```
+
+**Instruction file priority (highest → lowest):**
+1. Personal instructions (GitHub.com chat settings)
+2. Path-specific `.github/instructions/*.instructions.md`
+3. Repository-wide `.github/copilot-instructions.md`
+4. `AGENTS.md` (all agents)
+5. Organization custom instructions (Business/Enterprise only)
 
 **`.github/copilot-instructions.md` example:**
 ```markdown
@@ -251,7 +327,7 @@ You are a senior TypeScript engineer. Always:
 - Flag any `any` types with a comment
 ```
 
-This file is **automatically loaded** when Copilot opens any repo you own.
+> 💡 CLI note: all instruction files now **combine** rather than using priority-based fallbacks.
 
 ---
 
@@ -296,12 +372,17 @@ With MCP:     Copilot knows your code + your tickets + your docs + your data
 **Quick win MCP servers to try first:**
 | Server | What it adds |
 |--------|-------------|
-| `@modelcontextprotocol/server-github` | Issues, PRs, code search via API |
+| GitHub MCP (built-in CLI, VS Code Registry) | Issues, PRs, code search — zero config in CLI |
 | `@modelcontextprotocol/server-filesystem` | Read files outside workspace |
 | `@modelcontextprotocol/server-postgres` | Query your dev database in chat |
 | `@modelcontextprotocol/server-slack` | Read channel context |
+| Playwright MCP (pre-configured in cloud agent) | Browser automation for E2E testing |
 
-👉 **Demo:** Add GitHub MCP server, then ask `@github "summarize the last 5 merged PRs"`
+> 💡 **VS Code**: Browse and install MCP servers directly from the **GitHub MCP Registry** via the Extensions panel — no manual JSON editing needed.
+
+> ⚠️ **Business/Enterprise**: MCP is disabled by default — an admin must enable the "MCP servers in Copilot" policy.
+
+👉 **Demo:** Install an MCP server from the VS Code MCP Registry, then ask `@github "summarize the last 5 merged PRs"`
 
 ---
 
@@ -418,13 +499,28 @@ After a failed command in VS Code terminal → click the sparkle ✨ next to the
 @workspace /new  "create a React component for a data table with sorting and pagination"
 ```
 
-**8. Notebook support**
-Copilot works in Jupyter notebooks — great for data exploration and documentation.
+**8. Next edit suggestions**
+Copilot predicts the *next location* you'll need to edit and suggests it inline — accept with one click. No prompt needed.
 
-**9. Voice input (VS Code Insiders)**
-`Cmd+Alt+V` → speak your prompt — useful for longer descriptions.
+**9. Auto model selection + BYOK**
+Set model to **Auto** and Copilot picks the best model for each task (10% AI credit discount). Or bring your own API key (`BYOK`) for custom models.
 
-**10. The "Kebab menu" in chat**
+**10. Copilot Memory (Public Preview)**
+Copilot builds persistent knowledge about your repo — coding conventions, patterns, preferences — across sessions. No more re-explaining context.
+```bash
+# In CLI — query your session history
+> /chronicle "what did I work on last Tuesday?"
+> /chronicle "generate a standup summary for this week"
+```
+
+**11. Roll back changes in CLI**
+```bash
+# Rewind to a previous prompt state
+> Undo that last change and try a different approach
+# Or explicitly: Copilot can restore files to their pre-edit state
+```
+
+**12. The "Kebab menu" in chat**
 Every chat response has `···` → "Insert into Terminal", "Copy", "Insert at Cursor" — use these instead of copy-paste.
 
 ---
@@ -474,8 +570,17 @@ Copilot uses your code as context for suggestions. Enterprise plans include IP i
 > *"Can I use Copilot offline?"*  
 No — Copilot requires internet access (it calls GitHub's API).
 
-> *"What's the difference between Copilot Individual, Business, and Enterprise?"*  
-Individual: personal use, basic features. Business: org management, audit logs, policy controls. Enterprise: all of Business + fine-tuned models, Copilot Knowledge Bases, stricter data controls.
+> *"What's the difference between Copilot Free, Pro, Pro+, Max, Business, and Enterprise?"*
+**7 tiers total:**
+- **Free** — limited completions/chat, agent mode (IDE), no cloud agent
+- **Student** — free for verified students, includes cloud agent and AI credits
+- **Pro ($10/mo)** — unlimited completions, cloud agent, monthly AI credits
+- **Pro+ ($39/mo)** — everything in Pro + premium models (Claude, Codex)
+- **Max ($100/mo)** — highest AI credit allowance, priority access to new models/features
+- **Business ($19/seat/mo)** — org-managed, policy controls, MCP governed by admin, shared AI credits pool
+- **Enterprise ($39/seat/mo)** — everything in Business + larger credit pool + enterprise controls
+
+> Note: Claude by Anthropic and OpenAI Codex require **Pro+ or Enterprise**.
 
 ---
 
@@ -503,11 +608,14 @@ Escape          Dismiss suggestion
 Alt+]           Next suggestion
 Alt+[           Previous suggestion
 
-CLI
+CLI (new standalone Copilot CLI)
 ─────────────────────────────────────────
-gh copilot suggest "..."    Get a command
-gh copilot explain "..."    Explain a command
-gh issue edit 42 --add-assignee @copilot   Assign to agent
+copilot                     Start interactive session
+copilot --cloud             Cloud sandbox (cross-device)
+copilot -p "prompt"         Programmatic / single-shot mode
+Shift+Tab                   Toggle plan mode
+/plan    /fleet   /research /chronicle
+/compact /context /sandbox  /pr  /model  /mcp
 
 CHAT CONTEXT
 ─────────────────────────────────────────

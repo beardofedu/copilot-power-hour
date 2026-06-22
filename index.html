@@ -419,19 +419,42 @@ use the new JWT interface, then run the tests and fix failures.</code></pre>
 
       <!-- Pattern 2: CLI chaining -->
       <section data-background-color="#0d1117">
-        <h2>Pattern 2 — CLI chaining</h2>
-        <p>Use <code>gh copilot</code> to build context, then feed it forward.</p>
-        <pre><code class="language-bash"># Step 1 — understand the system
-gh copilot explain "how does our rate limiter work"
-
-# Step 2 — use that context in your next prompt
-gh copilot suggest "add retry logic to the HTTP client \
-  based on the rate limiter pattern"</code></pre>
-        <div class="callout blue" style="margin-top:0.8em;">
-          💡 Shell aliases save time — add these to <code>~/.zshrc</code>:<br>
-          <code>alias cops='gh copilot suggest'</code><br>
-          <code>alias cope='gh copilot explain'</code>
+        <h2>Pattern 2 — CLI: <code>/fleet</code> &amp; <code>/plan</code></h2>
+        <div class="callout orange" style="margin-bottom:0.6em;">
+          ⚠️ <strong>The old <code>gh copilot</code> extension is retired.</strong> It's replaced by the new standalone <strong>GitHub Copilot CLI</strong>.
         </div>
+        <pre><code class="language-bash"># Start an interactive session
+copilot
+
+# Use /fleet to split work into parallel sub-agents
+> /fleet "update all API routes to the new auth middleware, then run tests"
+
+# Toggle plan mode (review blueprint before coding)
+Shift+Tab   ← switch between execute and plan mode
+
+# Programmatic / script-friendly
+copilot -p "generate a changelog from git log" --allow-tool='shell(git)'</code></pre>
+        <div class="two-col" style="margin-top:0.6em;">
+          <div class="card">
+            <h3>Key slash commands</h3>
+            <ul>
+              <li><code>/plan</code> — blueprint before coding</li>
+              <li><code>/fleet</code> — parallel sub-agents</li>
+              <li><code>/research</code> — deep research mode</li>
+              <li><code>/chronicle</code> — session history &amp; standups</li>
+              <li><code>/model</code> — switch model mid-session</li>
+              <li><code>/sandbox</code> — local isolation</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Built-in GitHub MCP</h3>
+            <p>GitHub MCP server is pre-connected — no config needed:</p>
+            <pre><code class="language-text">> Browse my open PRs
+> Find good first issues
+> Create a branch and push it</code></pre>
+          </div>
+        </div>
+        <div class="demo-cue">Launch <code>copilot</code>, use <code>/plan</code> on a task, then <code>/fleet</code> to parallelize</div>
       </section>
 
       <!-- Pattern 3: Coding Agent -->
@@ -464,10 +487,45 @@ gh issue edit 42 --add-assignee "@copilot"
         <div class="demo-cue">Assign a real issue to @copilot and show the resulting PR</div>
       </section>
 
-    </section>
+      <!-- Pattern 4: Agentic Workflows -->
+      <section data-background-color="#0d1117">
+        <h2>Pattern 4 — GitHub Agentic Workflows <span class="tag tag-purple" style="font-size:0.5em; vertical-align:middle;">Public Preview</span></h2>
+        <p>Define AI automations as Markdown files — Copilot compiles them to hardened GitHub Actions workflows.</p>
+        <pre><code class="language-yaml">---
+# .github/workflows/triage.workflow.md
+on: issues
+permissions:
+  issues: write
+safe-outputs:
+  - add-comment
+max-ai-credits: 500
+---
+When a new issue is opened, analyze it and add a label
+and a brief triage comment explaining the priority.</code></pre>
+        <div class="two-col" style="margin-top:0.6em;">
+          <div class="card">
+            <h3>Supported engines</h3>
+            <ul>
+              <li>GitHub Copilot (default)</li>
+              <li>Anthropic Claude</li>
+              <li>OpenAI Codex</li>
+              <li>Google Gemini</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Safety model</h3>
+            <ul>
+              <li>Read-only by default</li>
+              <li>Write actions require <code>safe-outputs</code></li>
+              <li>Threat detection before write ops</li>
+              <li>Cost cap: <code>max-ai-credits</code> (default 1,000)</li>
+              <li>1 AI Credit = $0.01 USD</li>
+            </ul>
+          </div>
+        </div>
+      </section>
 
-    <!-- ══════════════════════════════════════════════════════
-         SECTION 2 — CLI VS IDE
+    </section>
     ══════════════════════════════════════════════════════ -->
     <section data-background-color="#0d1117">
 
@@ -498,22 +556,40 @@ gh issue edit 42 --add-assignee "@copilot"
 
       <!-- CLI deep dive -->
       <section data-background-color="#0d1117">
-        <h2>CLI — Two commands, infinite use cases</h2>
-        <pre><code class="language-bash"># Install / verify
-gh extension install github/gh-copilot
-gh copilot --version
+        <h2>CLI — New standalone Copilot CLI</h2>
+        <div class="callout orange" style="margin-bottom:0.5em; font-size:0.75em;">
+          ⚠️ <strong>The <code>gh copilot</code> extension is retired.</strong> Use the new standalone <code>copilot</code> CLI.
+        </div>
+        <div class="two-col">
+          <div>
+            <pre><code class="language-bash"># Interactive session
+copilot
 
-# suggest — "what command do I need?"
-gh copilot suggest "find files modified in last 7 days larger than 10MB"
+# Cloud sandbox (cross-device, persistent)
+copilot --cloud
 
-# explain — "what does this do?"
-gh copilot explain "awk '{print $2}' | sort | uniq -c | sort -rn"
+# Single-shot / script mode
+copilot -p "generate a changelog" \
+  --allow-tool='shell(git)'
 
-# Target a specific context
-gh copilot suggest -t shell   # shell command
-gh copilot suggest -t git     # git command
-gh copilot suggest -t gh      # GitHub CLI command</code></pre>
-        <div class="demo-cue">Live terminal — suggest a complex git command, then explain a scary one-liner</div>
+# Toggle plan mode
+Shift+Tab</code></pre>
+          </div>
+          <div>
+            <h3>Slash commands</h3>
+            <div class="shortcut-grid">
+              <span class="shortcut-key">/plan</span><span class="shortcut-desc">Blueprint before coding</span>
+              <span class="shortcut-key">/fleet</span><span class="shortcut-desc">Parallel sub-agents</span>
+              <span class="shortcut-key">/research</span><span class="shortcut-desc">Deep research mode</span>
+              <span class="shortcut-key">/chronicle</span><span class="shortcut-desc">Session history &amp; standups</span>
+              <span class="shortcut-key">/compact</span><span class="shortcut-desc">Compress context</span>
+              <span class="shortcut-key">/sandbox</span><span class="shortcut-desc">Local isolation</span>
+              <span class="shortcut-key">/pr</span><span class="shortcut-desc">Create/fix PRs from CLI</span>
+              <span class="shortcut-key">/model</span><span class="shortcut-desc">Switch model mid-session</span>
+            </div>
+          </div>
+        </div>
+        <div class="demo-cue">Live terminal — launch <code>copilot</code>, use <code>/plan</code>, then <code>/fleet</code></div>
       </section>
 
       <!-- IDE deep dive -->
@@ -521,27 +597,33 @@ gh copilot suggest -t gh      # GitHub CLI command</code></pre>
         <h2>IDE — Know your modes</h2>
         <div class="three-col">
           <div class="card">
-            <h3>Inline Chat</h3>
-            <p><code>Cmd+I</code></p>
-            <p style="margin-top:0.4em; color:var(--gh-muted)">Quick edits &amp; explanations on a selection</p>
+            <h3>Plan mode</h3>
+            <p>Review &amp; approve blueprint <em>before</em> the agent writes code</p>
           </div>
           <div class="card">
-            <h3>Panel Chat</h3>
-            <p><code>Cmd+Shift+I</code></p>
-            <p style="margin-top:0.4em; color:var(--gh-muted)">Multi-turn conversations with full context</p>
+            <h3>Agent mode</h3>
+            <p>Multi-file edits, runs tests, validates results — fully autonomous</p>
           </div>
           <div class="card">
-            <h3>Edits Mode</h3>
-            <p><code>Cmd+Shift+P</code><br><small>→ "Copilot Edits"</small></p>
-            <p style="margin-top:0.4em; color:var(--gh-muted)">Multi-file changes in one session</p>
+            <h3>Inline chat</h3>
+            <p><code>Cmd+I</code> — quick edits &amp; explanations on a selection</p>
           </div>
         </div>
-        <h3 style="margin-top:1em;">Context references — use <code>#</code></h3>
-        <pre><code class="language-text">@workspace  "Find all API endpoints missing auth middleware"
-#file:src/routes/users.ts  "Why is this returning 403?"
-#codebase   "How is logging configured?"
-#selection  "Refactor this to use async/await"</code></pre>
-        <div class="demo-cue">Use @workspace for a cross-file question, then switch to Edits mode to apply the fix</div>
+        <h3 style="margin-top:0.8em;">AGENTS.md — align ALL agents to your project</h3>
+        <pre><code class="language-markdown"># AGENTS.md  ← repo root; respected by Copilot, Claude, Codex
+Use async/await only. Write Jest tests for every new function.
+Follow the error-handling pattern in src/middleware/errors.js.</code></pre>
+        <div class="two-col" style="margin-top:0.6em;">
+          <div class="card">
+            <h3>Next edit suggestions</h3>
+            <p>Copilot predicts the <em>next location</em> you'll edit and suggests it inline — accept with one click.</p>
+          </div>
+          <div class="card">
+            <h3>Third-party agents <span class="tag tag-blue" style="font-size:0.65em;">Pro+ / Enterprise</span></h3>
+            <p>Claude by Anthropic &amp; OpenAI Codex available in VS Code — no extra account needed.</p>
+          </div>
+        </div>
+        <div class="demo-cue">Show Plan mode generating a blueprint, then Agent mode executing it across multiple files</div>
       </section>
 
       <!-- Chat participants -->
@@ -624,32 +706,35 @@ repo:org/repo is:pr merged \
       <!-- Personal repos as config layer -->
       <section data-background-color="#0d1117">
         <h2>Your personal repo = Copilot config layer</h2>
-        <div class="callout" style="margin-bottom:0.8em;">
+        <div class="callout" style="margin-bottom:0.6em;">
           Your GitHub account is a <strong>superpower</strong> for Copilot customization — store your persona, prompts, and settings there.
         </div>
         <div class="two-col">
           <div>
             <pre><code class="language-text">my-copilot-config/
 ├── .github/
-│   └── copilot-instructions.md
+│   ├── copilot-instructions.md   ← repo-wide
+│   └── instructions/
+│       └── api.instructions.md  ← path-specific
+├── AGENTS.md           ← all agents (Copilot, Claude, Codex)
 ├── prompts/
 │   ├── code-review.md
-│   ├── pr-description.md
-│   └── standup-summary.md
+│   └── pr-description.md
 └── settings/
     └── vscode-settings.json</code></pre>
           </div>
           <div>
-            <h3><code>.github/copilot-instructions.md</code></h3>
-            <pre><code class="language-markdown">You are a senior TypeScript engineer.
-Always:
-- Prefer `const` over `let`
-- Add JSDoc to exported functions
-- Suggest error boundaries for React
-- Flag any `any` types with a comment</code></pre>
-            <p style="color:var(--gh-muted); font-size:0.7em; margin-top:0.4em;">
-              ✅ Auto-loaded for every repo you own
-            </p>
+            <h3>Instruction priority (high → low)</h3>
+            <ol style="font-size:0.72em; margin-left:1.2em;">
+              <li>Personal (GitHub.com chat settings)</li>
+              <li>Path-specific <code>.github/instructions/*.instructions.md</code></li>
+              <li>Repo-wide <code>.github/copilot-instructions.md</code></li>
+              <li><code>AGENTS.md</code></li>
+              <li>Org instructions (Business/Enterprise)</li>
+            </ol>
+            <div class="callout blue" style="margin-top:0.6em; font-size:0.72em;">
+              💡 In the CLI, all instruction files <strong>combine</strong> rather than using priority-based fallbacks.
+            </div>
           </div>
         </div>
       </section>
@@ -667,12 +752,15 @@ Always:
             <table>
               <thead><tr><th>Server</th><th>Adds</th></tr></thead>
               <tbody>
-                <tr><td><code>server-github</code></td><td>Issues, PRs, API</td></tr>
+                <tr><td>GitHub MCP <span class="tag tag-green" style="font-size:0.6em;">built-in CLI</span></td><td>Issues, PRs, API — zero config in CLI</td></tr>
                 <tr><td><code>server-filesystem</code></td><td>Files outside workspace</td></tr>
                 <tr><td><code>server-postgres</code></td><td>Query your dev DB</td></tr>
-                <tr><td><code>server-slack</code></td><td>Channel context</td></tr>
+                <tr><td>Playwright MCP</td><td>Browser automation</td></tr>
               </tbody>
             </table>
+            <div class="callout orange" style="margin-top:0.5em; font-size:0.7em;">
+              ⚠️ <strong>Business/Enterprise:</strong> MCP disabled by default — admin must enable the policy.
+            </div>
           </div>
           <div>
             <h3>Enable in User Settings JSON</h3>
@@ -791,7 +879,7 @@ Always:
         <h2>Slash commands &amp; quick wins</h2>
         <div class="two-col">
           <div>
-            <h3>Slash commands</h3>
+            <h3>IDE chat slash commands</h3>
             <div class="shortcut-grid">
               <span class="shortcut-key">/fix</span><span class="shortcut-desc">Fix selected code</span>
               <span class="shortcut-key">/explain</span><span class="shortcut-desc">Explain what it does</span>
@@ -799,19 +887,20 @@ Always:
               <span class="shortcut-key">/doc</span><span class="shortcut-desc">Add documentation</span>
               <span class="shortcut-key">/new</span><span class="shortcut-desc">Scaffold a new file/component</span>
             </div>
+            <h3 style="margin-top:0.7em;">New: Next edit suggestions</h3>
+            <p style="font-size:0.75em;">Copilot predicts the <em>next location</em> you'll edit and suggests it inline — accept with one click. No prompt needed.</p>
           </div>
           <div>
             <h3>Built-in sparkle ✨ moments</h3>
             <ul>
               <li><strong>Commit messages</strong> — click ✨ in Source Control panel</li>
               <li><strong>PR descriptions</strong> — click "Copilot" when creating a PR</li>
-              <li><strong>Terminal errors</strong> — click ✨ next to failed command for instant fix</li>
-              <li><strong>Kebab menu <code>···</code></strong> in chat — "Insert into Terminal" / "Insert at Cursor"</li>
+              <li><strong>Terminal errors</strong> — click ✨ next to failed command</li>
+              <li><strong>Kebab menu <code>···</code></strong> — "Insert into Terminal" / "Insert at Cursor"</li>
             </ul>
+            <h3 style="margin-top:0.7em;">Auto model + BYOK</h3>
+            <p style="font-size:0.75em;">Set model to <strong>Auto</strong> — Copilot picks the best model per task (10% AI credit discount). Or bring your own API key for custom models.</p>
           </div>
-        </div>
-        <div class="callout" style="margin-top:0.8em;">
-          <code>@workspace /new "React data table with sorting and pagination"</code>
         </div>
       </section>
 
@@ -819,16 +908,17 @@ Always:
       <section data-background-color="#0d1117">
         <h2>3 power workflows</h2>
         <div class="card" style="margin-bottom:0.7em;">
-          <h3>☀️ Morning Standup Flow</h3>
-          <pre><code class="language-bash">gh copilot suggest "show my git commits from yesterday across all repos"
-# or in chat:
-# "@github summarize my merged PRs and closed issues from last 24 hours"</code></pre>
+          <h3>☀️ Morning Standup Flow — <code>/chronicle</code></h3>
+          <pre><code class="language-bash"># In the new Copilot CLI:
+> /chronicle "what did I work on yesterday?"
+> /chronicle "generate a standup summary for this week"</code></pre>
         </div>
         <div class="card" style="margin-bottom:0.7em;">
-          <h3>🦆 Rubber Duck Review</h3>
-          <pre><code class="language-text">Before submitting a PR — paste your diff and ask:
-"Review this for: security issues, missing error handling,
- performance problems, and anything that'll get flagged in review."</code></pre>
+          <h3>🦆 Rubber Duck Review (now built-in)</h3>
+          <pre><code class="language-text">Copilot CLI has a built-in rubber duck agent — uses a different
+model to critique your plan/code/tests before you ship.
+Or in chat: "Review this diff for security issues, missing error
+handling, perf problems, and anything that'll get flagged in review."</code></pre>
         </div>
         <div class="card">
           <h3>🧭 Onboarding Accelerator</h3>
@@ -851,10 +941,13 @@ How do I run it locally? Where would I add a new API endpoint?"</code></pre>
               <span class="shortcut-key">Alt+]</span><span class="shortcut-desc">Next suggestion</span>
               <span class="shortcut-key">Alt+[</span><span class="shortcut-desc">Previous suggestion</span>
             </div>
-            <h3 style="margin-top:0.8em;">CLI</h3>
+            <h3 style="margin-top:0.8em;">Copilot CLI</h3>
             <div class="shortcut-grid">
-              <span class="shortcut-key">cops "..."</span><span class="shortcut-desc">Suggest a command</span>
-              <span class="shortcut-key">cope "..."</span><span class="shortcut-desc">Explain a command</span>
+              <span class="shortcut-key">copilot</span><span class="shortcut-desc">Start interactive session</span>
+              <span class="shortcut-key">copilot --cloud</span><span class="shortcut-desc">Cloud sandbox</span>
+              <span class="shortcut-key">Shift+Tab</span><span class="shortcut-desc">Toggle plan mode</span>
+              <span class="shortcut-key">/fleet</span><span class="shortcut-desc">Parallel sub-agents</span>
+              <span class="shortcut-key">/chronicle</span><span class="shortcut-desc">Session history</span>
             </div>
           </div>
           <div>
@@ -899,8 +992,9 @@ How do I run it locally? Where would I add a new API endpoint?"</code></pre>
           <p><code>Cmd+Shift+P</code> → "Copilot: Toggle Inline Suggestions" — or set <code>"github.copilot.editor.enableAutoCompletions": false</code></p>
         </div>
         <div class="card">
-          <h3>Individual vs Business vs Enterprise?</h3>
-          <p><strong>Individual:</strong> personal, basic features &nbsp;·&nbsp; <strong>Business:</strong> org management, audit logs, policy controls &nbsp;·&nbsp; <strong>Enterprise:</strong> fine-tuned models, Knowledge Bases, strict data controls</p>
+          <h3>What are the plan tiers?</h3>
+          <p><strong>7 tiers:</strong> Free · Student · <strong>Pro</strong> ($10/mo) · <strong>Pro+</strong> ($39/mo) · <strong>Max</strong> ($100/mo) · <strong>Business</strong> ($19/seat) · <strong>Enterprise</strong> ($39/seat)</p>
+          <p style="margin-top:0.4em; color:var(--gh-muted);">Cloud agent requires a paid plan. Claude &amp; Codex require Pro+ or Enterprise. MCP requires admin enablement on Business/Enterprise.</p>
         </div>
       </section>
 
